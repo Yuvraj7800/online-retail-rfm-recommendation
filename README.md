@@ -1,44 +1,122 @@
-# Task 1: Data Cleaning and Preprocessing
+# 🛍️ Online Retail — Customer Segmentation & Product Recommendation
 
-**Dataset:** Customer Personality Analysis / Marketing Campaign Data (Kaggle)
-**File:** `marketing_campaign.csv` (tab-separated, 2240 rows x 29 columns)
-**Tools used:** Python (Pandas, openpyxl)
+> End-to-end machine learning project on **541,909 UK e-commerce transactions** (Dec 2010 – Dec 2011): customers segmented via **RFM + K-Means clustering**, paired with an **item-based collaborative filtering** recommendation engine — both deployed in an interactive **Streamlit app**.
 
-## Objective
-Clean and prepare the raw marketing campaign dataset by handling missing values, duplicates, inconsistent formats, and incorrect data types, following the task's mini-guide.
+---
 
-## Steps Performed
+## 🚀 Live App
 
-1. **Loaded raw data** — 2240 rows, 29 columns, tab-delimited.
-2. **Renamed column headers** — converted all headers to lowercase with underscores (e.g. `Year_Birth` → `year_birth`) for clean, uniform naming.
-3. **Identified missing values** — used `.isnull()`; found 24 missing values, all in `Income`.
-4. **Handled missing values** — filled missing `income` values with the column **median** (51,381.50) using `.fillna()`. Median was used instead of mean because the column contains an extreme outlier.
-5. **Checked for duplicates** — used `.duplicated()` on full rows and on `id`; found **0 duplicates** (verified, none removed).
-6. **Standardized text values**:
-   - `education`: trimmed whitespace, applied title case, fixed `"2n Cycle"` → `"2nd Cycle"`.
-   - `marital_status`: trimmed whitespace, applied title case, relabeled non-standard placeholder values (`Absurd`, `YOLO`, `Alone` — 7 rows total) to `"Other"`.
-7. **Converted date format** — parsed `dt_customer` from raw `dd-mm-yyyy` strings into proper datetime objects, then standardized the output back to a consistent `dd-mm-yyyy` text format.
-8. **Fixed data types** — verified and cast all count/flag columns to `int64` and `income` to `float64`.
-9. **Outlier treatment**:
-   - Removed 3 rows with implausible `year_birth` values (1893, 1899, 1900 → implied ages of 114–121), clear data-entry errors.
-   - Removed 1 row with an extreme `income` value (666,666 — roughly 4x the next highest value).
-10. **Removed non-informative columns** — `z_costcontact` and `z_revenue` were constant across every row and dropped.
-11. **Added derived columns** — `age` (2014 − year_birth), `total_spending` (sum of all `Mnt*` columns), `total_children` (kidhome + teenhome).
-12. **Final quality check** — confirmed 0 missing values, 0 duplicate rows, and consistent data types across the cleaned dataset.
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](YOUR_STREAMLIT_LINK_HERE)
 
-## Result
+---
 
-| | Raw | Cleaned |
-|---|---|---|
-| Rows | 2240 | 2236 |
-| Columns | 29 | 30 |
-| Missing values | 24 | 0 |
-| Duplicate rows | 0 | 0 |
+## 📊 Dataset Summary
 
-## Files in this submission
-- `marketing_campaign.csv` — original raw dataset
-- `marketing_campaign_cleaned.csv` — final cleaned dataset
-- `Marketing_Campaign_Cleaned.xlsx` — cleaned dataset + formatted cleaning-summary sheet
-- `clean_data.py` — Python (Pandas) script used to perform the cleaning
-- `cleaning_log.txt` — console log of the cleaning run
-- `README.md` — this file
+| Metric | Raw | After Cleaning |
+|--------|-----|----------------|
+| Rows | 541,909 | 392,692 |
+| Unique Customers | — | 4,338 |
+| Unique Products | — | 3,866 |
+| Countries | 38 | 37 |
+| Date Range | Dec 2010 – Dec 2011 | same |
+
+---
+
+## 🧠 Methodology
+
+1. **Data Cleaning** — Dropped missing CustomerIDs, removed cancellations, non-positive quantities/prices, and duplicates
+2. **EDA** — Transaction volume by country, top-selling products, revenue distribution
+3. **RFM Feature Engineering** — Recency, Frequency, Monetary per customer — log-transformed and standardized
+4. **Cluster Selection** — Silhouette score tested for k = 2–8 → **k=4 chosen** (score: 0.3375)
+5. **K-Means Clustering** → 4 segments labeled by RFM averages
+6. **Item-Based Collaborative Filtering** — Cosine similarity on a 4,338 × 3,289 customer-product matrix
+
+---
+
+## 🏆 Customer Segment Results
+
+| Segment | Avg Recency | Avg Frequency | Avg Monetary | % of Customers |
+|---------|-------------|---------------|--------------|----------------|
+| **Champions (High-Value)** | 12 days | 13.8 orders | £8,088 | 16.4% |
+| **Loyal / Regular** | 72 days | 4.1 orders | £1,802 | 26.9% |
+| **Occasional / New** | 18 days | 2.2 orders | £557 | 19.3% |
+| **At-Risk / Lost** | 182 days | 1.3 orders | £341 | 37.4% |
+
+---
+
+## 🎯 Recommendation System
+
+- **Approach:** Item-based collaborative filtering, cosine similarity
+- **Matrix:** 4,338 customers × 3,289 products (products with ≥5 purchases)
+- **Example:** Querying *"WHITE HANGING HEART T-LIGHT HOLDER"* returns:
+  1. GIN + TONIC DIET METAL SIGN — 0.750
+  2. RED HANGING HEART T-LIGHT HOLDER — 0.659
+  3. WASHROOM METAL SIGN — 0.644
+  4. LAUNDRY 15C METAL SIGN — 0.642
+  5. GREEN VINTAGE SPOT BEAKER — 0.631
+
+---
+
+## 📱 Streamlit App — Two Modules
+
+| Module | Function |
+|--------|----------|
+| 🎯 Product Recommendation | Enter a product name → get top 5 similar products with similarity scores |
+| 👥 Customer Segmentation | Enter Recency / Frequency / Monetary → predict customer segment with action advice |
+
+### Run Locally
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+---
+
+## 💡 Key Business Insights
+
+1. **Champions are only 16.4%** of customers but spend 14× more than At-Risk customers on average
+2. **At-Risk/Lost is the largest segment (37.4%)** — over a third of customers have gone quiet
+3. **UK dominates (~89% of transactions)** — Germany, France, Ireland are under-penetrated
+4. **Mean spend £2,049 vs median £669** — a small number of bulk buyers inflate the average
+
+---
+
+## 🚀 7-Point Growth Roadmap
+
+| Priority | Action | Target |
+|----------|--------|--------|
+| 1 | Automated win-back flow at 90 days inactivity | At-Risk / Lost |
+| 2 | VIP loyalty tier — early access, free shipping | Champions |
+| 3 | Cross-sell prompts at checkout using recommender | Loyal / Regular |
+| 4 | Onboarding sequence in first 30–60 days | Occasional / New |
+| 5 | Targeted acquisition in Germany, France, Ireland | New Markets |
+| 6 | Embed recommender in live storefront + emails | All Segments |
+| 7 | Re-run RFM monthly — track segment migration | All Segments |
+
+---
+
+## 📁 Project Structure
+
+```
+online-retail-rfm-recommendation/
+├── app.py                                   # Streamlit app
+├── rfm_kmeans_model.pkl                     # KMeans model + scaler + labels
+├── item_similarity_matrix.pkl               # Product-product similarity matrix
+├── rfm_customer_segments.csv               # Customer RFM + segment table
+├── Online_Retail_RFM_Recommendation.ipynb  # Full analysis notebook
+├── Retail_Intelligence_Pro.pptx            # Project presentation
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## 🛠️ Tech Stack
+
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
+![Pandas](https://img.shields.io/badge/Pandas-150458?style=flat&logo=pandas&logoColor=white)
+![Scikit-learn](https://img.shields.io/badge/Scikit--learn-F7931E?style=flat&logo=scikit-learn&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white)
+![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=flat&logo=jupyter&logoColor=white)
+
+**Libraries:** Pandas · NumPy · Scikit-learn · Matplotlib · Seaborn · Streamlit · Joblib
