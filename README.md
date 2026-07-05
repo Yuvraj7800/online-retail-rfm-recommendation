@@ -6,7 +6,8 @@
 
 ## 🚀 Live App
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](YOUR_STREAMLIT_LINK_HERE)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)]
+https://online-retail-rfm-recommendation-7knthtjdxmtdtjc6jh8ysd.streamlit.app
 
 ---
 
